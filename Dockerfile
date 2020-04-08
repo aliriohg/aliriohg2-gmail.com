@@ -17,4 +17,6 @@ COPY bin/run.sh .
 
 RUN mvn install --offline
 
+RUN mvn -B install
+
 ENTRYPOINT ["./run.sh"]

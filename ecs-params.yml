@@ -1,0 +1,17 @@
+version: 1
+task_definition:
+  task_role_arn: arn:aws:iam::296553184312:role/gatling-alirio-role
+  task_execution_role: ecsTaskExecutionRole
+  ecs_network_mode: awsvpc
+  task_size:
+    mem_limit: 2GB
+    cpu_limit: 1024
+run_params:
+  network_configuration:
+    awsvpc_configuration:
+      subnets:
+        - "subnet-0e1b9d04a3fd5f5fc"
+        - "subnet-0e9ab822ca6d9b4fd"
+      security_groups:
+        - "sg-002121f1cf602f168"
+      assign_public_ip: ENABLED
