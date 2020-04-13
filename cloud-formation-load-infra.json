@@ -1,0 +1,145 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "load test infra ECS-S3-ROLES",
+    "Parameters": {
+        "PrefixName": {
+            "Description": "Prefix Gatling name",
+            "Type": "String"
+        },
+        "Command": {
+            "Description": "The command that is passed to the container.",
+            "Type": "CommaDelimitedList"
+        }
+    },
+    "Resources": {
+        "GatlingResultS3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": { "Fn::Sub": "${PrefixName}-gatling-result-bucket" },
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "GatlingResultS3BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": { "Ref": "GatlingResultS3Bucket" },
+                "PolicyDocument": {
+                    "Statement": [{
+                        "Action": ["s3:*"],
+                        "Effect": "Allow",
+                        "Resource": { "Fn::Join": ["", ["arn:aws:s3:::", { "Ref": "GatlingResultS3Bucket" }, "/*"]] },
+                        "Principal": {
+                            "AWS": { "Fn::GetAtt": ["ECSTaskGatlingExecutionRole", "Arn"] }
+                        }
+                    }]
+                }
+            }
+        },
+        "GatlingECSCluster": {
+            "Type": "AWS::ECS::Cluster",
+            "Properties": {
+                "ClusterName": "gatling-ecs-cluster",
+                "ClusterSettings": [{
+                    "Name": "containerInsights",
+                    "Value": "enabled"
+                }]
+            }
+        },
+        "GatlingTaskDefinition": {
+            "Type": "AWS::ECS::TaskDefinition",
+            "Properties": {
+                "ExecutionRoleArn": {
+                    "Fn::GetAtt": ["ECSTaskGatlingExecutionRole", "Arn"]
+                },
+                "TaskRoleArn": {
+                    "Fn::GetAtt": ["ECSTaskGatlingExecutionRole", "Arn"]
+                },
+                "RequiresCompatibilities": ["FARGATE"],
+                "NetworkMode": "awsvpc",
+                "ContainerDefinitions": [{
+                    "Name": { "Fn::Sub": "${PrefixName}-gatling-runner" },
+                    "Image": "296553184312.dkr.ecr.us-east-1.amazonaws.com/gatling-images:latest",
+                    "LogConfiguration": {
+                        "LogDriver": "awslogs",
+                        "Options": {
+                            "awslogs-group": "/ecs/gatling-runner",
+                            "awslogs-region": "us-east-1",
+                            "awslogs-stream-prefix": "gatling-runner"
+                        }
+                    },
+                    "Command": ["-r", "gatling-result", "-s", "com.alirio.simulation.BasicSimulation"],
+                    "Environment": [
+                        { "Name": "GATLING_MAX_DURATION", "Value": "1" },
+                        { "Name": "GATLING_NR_USERS", "Value": "1" },
+                        { "Name": "GATLING_RAMPUP_TIME", "Value": "10" }
+                    ],
+                    "Ulimits": [
+                        { "Name": "nofile", "SoftLimit": 65535, "HardLimit": 65535 },
+                        { "Name": "nproc", "SoftLimit": 65535, "HardLimit": 65535 }
+                    ],
+                    "Essential": true
+                }],
+                "Cpu": "1024",
+                "Memory": "2048"
+            }
+        },
+        "GatlingECSService": {
+            "Type": "AWS::ECS::Service",
+            "Properties": {
+                "ServiceName": { "Fn::Sub": "${PrefixName}-gatling-ecs-service" },
+                "Cluster": { "Ref": "GatlingECSCluster" },
+                "LaunchType": "FARGATE",
+                "NetworkConfiguration": {
+                    "AwsvpcConfiguration": {
+                        "SecurityGroups": ["sg-066606096e513e380"],
+                        "Subnets": ["subnet-0ab0b5c3d07f39b80", "subnet-0780d36059e7d51f7"]
+                    }
+                },
+                "DesiredCount": 1,
+                "TaskDefinition": { "Ref": "GatlingTaskDefinition" }
+            }
+        },
+        "ECSTaskGatlingExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "ecs-tasks.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
+                },
+                "Path": "/",
+                "Policies": [{
+                    "PolicyName": "ECSTaskGatlingExecutionRolePolicy",
+                    "PolicyDocument": {
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": [
+                                "ecr:GetAuthorizationToken",
+                                "ecr:BatchCheckLayerAvailability",
+                                "ecr:GetDownloadUrlForLayer",
+                                "ecr:BatchGetImage",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": "*"
+                        }]
+                    }
+                }]
+            }
+        }
+    }
+}

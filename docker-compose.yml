@@ -1,8 +1,8 @@
 version: '2'
 services:
   gatling-runner:
-    image: 296553184312.dkr.ecr.us-east-1.amazonaws.com/gatling-runner:latest
-    command: -r alirio-test
+    image: 296553184312.dkr.ecr.us-east-1.amazonaws.com/gatling-images:latest
+    command: -r gatling-result -s com.alirio.simulation.BasicSimulation
     environment:
       - GATLING_NR_USERS=1
       - GATLING_MAX_DURATION=1

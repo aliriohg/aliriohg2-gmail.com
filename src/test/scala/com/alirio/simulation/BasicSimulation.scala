@@ -21,6 +21,7 @@ class BasicSimulation extends Simulation {
 
   val httpProtocol = http
     .baseUrl(baseUrl)
+    .doNotTrackHeader("1")
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     .acceptLanguageHeader("en-US,en;q=0.5")
     .acceptEncodingHeader("gzip, deflate")
@@ -34,11 +35,12 @@ class BasicSimulation extends Simulation {
     basicScenario.inject(
       nothingFor(4 seconds),
       //          rampUsers(100) during (5 seconds)
-      rampUsersPerSec(1) to (20) during (10 seconds),
-      constantUsersPerSec(20) during (30 seconds),
-      rampUsersPerSec(20) to (40) during (10 seconds),
+      rampUsersPerSec(1) to (100) during (120 seconds)
     )
   ).maxDuration(maxDuration).protocols(httpProtocol)
+    .throttle(
+          reachRps(100) in (120 seconds)
+        )
 
 
 }
