@@ -38,9 +38,6 @@ class BasicSimulation extends Simulation {
       rampUsersPerSec(1) to (100) during (120 seconds)
     )
   ).maxDuration(maxDuration).protocols(httpProtocol)
-    .throttle(
-          reachRps(100) in (120 seconds)
-        )
 
 
 }
