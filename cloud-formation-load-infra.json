@@ -1,9 +1,13 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "load test infra ECS-S3-ROLES",
+    "Description": "load test infra ECS-S3",
     "Parameters": {
         "PrefixName": {
             "Description": "Prefix Gatling name",
+            "Type": "String"
+        },
+        "DockerImage": {
+            "Description": "Prefix DockerImage",
             "Type": "String"
         },
         "SimulationPath": {
@@ -211,7 +215,7 @@
                 "NetworkMode": "awsvpc",
                 "Family": { "Fn::Sub": "${PrefixName}-gatling-taskdefinition" },
                 "ContainerDefinitions": [{
-                    "Name": { "Fn::Sub": "${PrefixName}-gatling-runner" },
+                    "Name": { "Ref": "DockerImage" },
                     "Image": "296553184312.dkr.ecr.us-east-1.amazonaws.com/gatling-images:latest",
                     "LogConfiguration": {
                         "LogDriver": "awslogs",
@@ -289,6 +293,12 @@
                 "Ref": "GatlingTaskDefinition"
             }
         },
+        "GatlingECSCluster": {
+            "Description": "A reference to the GatlingECSCluster",
+            "Value": {
+                "Ref": "GatlingECSCluster"
+            }
+        },
         "DefaultSecurityGroup": {
             "Description": "A reference to the DefaultSecurityGroup",
             "Value": {
@@ -304,7 +314,7 @@
         "PublicSubnetB": {
             "Description": "A reference to the DefaultSecurityGroup",
             "Value": {
-                "Ref": "PublicSubnetA"
+                "Ref": "PublicSubnetB"
             }
         }
     }

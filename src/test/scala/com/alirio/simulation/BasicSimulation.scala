@@ -33,11 +33,11 @@ class BasicSimulation extends Simulation {
 
   setUp(
     basicScenario.inject(
-      nothingFor(4 seconds),
-      //          rampUsers(100) during (5 seconds)
-      rampUsersPerSec(1) to (100) during (120 seconds)
+      nothingFor(4 seconds), // Tiempo inicial de espera, puede ser 4 segundos o 10 lo que quieras
+      atOnceUsers(1), // Puedes inyectarlos de una, acá probamos cargas súbitas y el comportamiento del sistema
+      rampUsersPerSec(1) to 200 during (8 minutes), // Se pueden inyectar gradualmente hasta ese valor de quiebre
+      constantUsersPerSec(200) during ( 7 minutes),
     )
-  ).maxDuration(maxDuration).protocols(httpProtocol)
-
+  ).protocols(httpProtocol)
 
 }

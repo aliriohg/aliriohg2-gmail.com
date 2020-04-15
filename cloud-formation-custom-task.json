@@ -1,0 +1,54 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "load test infra ECS-custom task",
+    "Parameters": {
+        "ServiceToken": {
+            "Description": "service token",
+            "Type": "String"
+        },
+        "GatlingTaskDefinition": {
+            "Description": "GatlingTaskDefinition",
+            "Type": "String"
+        },
+        "GatlingECSCluster": {
+            "Description": "GatlingECSCluster",
+            "Type": "String"
+        },
+        "CountInstance": {
+            "Description": "CIDR block for SubnetB",
+            "Type": "Number",
+            "Default": 1
+        },
+        "DefaultSecurityGroup": {
+            "Description": "DefaultSecurityGroup",
+            "Type": "String"
+        },
+        "PublicSubnetA": {
+            "Description": "PublicSubnetA",
+            "Type": "String"
+        },
+        "PublicSubnetB": {
+            "Description": "PublicSubnetB",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "RUNECSTASK": {
+            "Type": "Custom::ECSRunTask",
+            "Properties": {
+                "ServiceToken": { "Ref": "ServiceToken" },
+                "ClusterId": { "Ref": "GatlingECSCluster" },
+                "TaskDefinition": { "Ref": "GatlingTaskDefinition" },
+                "LaunchType": "FARGATE",
+                "Count": { "Ref": "CountInstance" },
+                "NetworkConfiguration": {
+                    "AwsvpcConfiguration": {
+                        "AssignPublicIp": "ENABLED",
+                        "SecurityGroups": [{ "Ref": "DefaultSecurityGroup" }],
+                        "Subnets": [{ "Ref": "PublicSubnetA" }, { "Ref": "PublicSubnetB" }]
+                    }
+                }
+            }
+        }
+    }
+}
