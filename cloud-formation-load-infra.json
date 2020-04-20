@@ -215,8 +215,8 @@
                 "NetworkMode": "awsvpc",
                 "Family": { "Fn::Sub": "${PrefixName}-gatling-taskdefinition" },
                 "ContainerDefinitions": [{
-                    "Name": { "Ref": "DockerImage" },
-                    "Image": "296553184312.dkr.ecr.us-east-1.amazonaws.com/gatling-images:latest",
+                    "Name": { "Fn::Sub": "${PrefixName}-gatling-runner" },
+                    "Image": { "Ref": "DockerImage" },
                     "LogConfiguration": {
                         "LogDriver": "awslogs",
                         "Options": {
@@ -239,8 +239,8 @@
                     ],
                     "Essential": true
                 }],
-                "Cpu": "1024",
-                "Memory": "2048"
+                "Cpu": "2048",
+                "Memory": "4096"
             }
         },
         "ECSTaskGatlingExecutionRole": {

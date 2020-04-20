@@ -151,6 +151,8 @@
           <reportsOnly>${reportsOnly}</reportsOnly>
           <jvmArgs>
             <jvmArg>-Xss20M</jvmArg>
+            <jvmArg>-Xms1600M</jvmArg>
+            <jvmArg>-Xmx1600M</jvmArg>
           </jvmArgs>
         </configuration>
       </plugin>
