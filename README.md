@@ -40,8 +40,12 @@ you run the test in distributed mode using cloudformation with cloud-formation-c
   * PublicSubnetA:  OutPut cloud-formation-load-infra.json
   * PublicSubnetB:  OutPut cloud-formation-load-infra.json.
   
-  you can run the task manually using console taskdefinition in aws.
+  you can run the task manually using console taskdefinition in aws or with this command.
+  aws ecs run-task --cluster <GatlingECSCluster> --launch-type FARGATE --task-definition <GatlingTaskDefinition> --count <CountInstance> --network-configuration "awsvpcConfiguration={subnets=["PublicSubnetA","PublicSubnetB"],securityGroups= ["DefaultSecurityGroup"],assignPublicIp=ENABLED}" --profile <profile-aws-local>
 
 ### Creating HTML report
 Generate final HTML report:
 ` sh generateHTMLReport.sh -r <buecket-name> -p <profile-aws-local>`
+
+##This guide was inspired by:
+https://medium.com/@richard.hendricksen/distributed-load-testing-with-gatling-using-docker-and-aws-d497605692db
