@@ -107,6 +107,12 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-compiler</artifactId>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.github.mnogu/gatling-kafka -->
+    <dependency>
+      <groupId>com.github.mnogu</groupId>
+      <artifactId>gatling-kafka_2.12</artifactId>
+      <version>0.3.1</version>
+    </dependency>
   </dependencies>
 
   <build>
